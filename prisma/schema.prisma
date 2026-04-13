@@ -8,19 +8,21 @@ datasource db {
 }
 
 model SourceContent {
-  id           String   @id @default(cuid())
-  externalId   String   @unique
-  sourceType   String
-  sourceName   String
-  title        String
-  body         String
-  url          String
-  publishedAt  DateTime
-  sectorHint   String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  externalId  String?  @unique
+  sourceType  String
+  sourceName  String
+  author      String?
+  title       String
+  body        String
+  url         String   @unique
+  publishedAt DateTime
+  sectorHint  String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  ideas        ProcessedIdea[]
+  ideas ProcessedIdea[]
 
   @@index([sourceType, publishedAt])
 }
