@@ -12,6 +12,7 @@ async function main() {
         url: video.url,
       },
       update: {
+        externalId: video.externalId,
         sourceType: video.sourceType,
         sourceName: video.sourceName,
         author: video.author,
@@ -21,6 +22,7 @@ async function main() {
         metadata: video.metadata,
       },
       create: {
+        externalId: video.externalId,
         sourceType: video.sourceType,
         sourceName: video.sourceName,
         author: video.author,
