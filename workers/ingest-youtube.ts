@@ -1,30 +1,47 @@
-import { prisma } from "../lib/prisma";
-import { YOUTUBE_CHANNELS } from "../config/youtube-channels";
+import { PrismaClient } from "@prisma/client";
+import { fetchRecentVideosAllChannels } from "@/lib/youtube";
+
+const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Stub YouTube ingest starting...");
-  for (const channel of YOUTUBE_CHANNELS) {
+  const videos = await fetchRecentVideosAllChannels(7);
+
+  for (const video of videos) {
     await prisma.sourceContent.upsert({
-      where: { externalId: `stub-${channel.name}` },
-      update: {},
+      where: {
+        url: video.url,
+      },
+      update: {
+        sourceType: video.sourceType,
+        sourceName: video.sourceName,
+        author: video.author,
+        title: video.title,
+        body: video.body,
+        publishedAt: video.publishedAt,
+        metadata: video.metadata,
+      },
       create: {
-        externalId: `stub-${channel.name}`,
-        sourceType: "youtube",
-        sourceName: channel.name,
-        title: `Sample upload for ${channel.name}`,
-        body: "Replace this stub with real YouTube Data API ingestion.",
-        url: "https://youtube.com",
-        publishedAt: new Date(),
+        sourceType: video.sourceType,
+        sourceName: video.sourceName,
+        author: video.author,
+        title: video.title,
+        body: video.body,
+        url: video.url,
+        publishedAt: video.publishedAt,
+        metadata: video.metadata,
       },
     });
   }
-  console.log("Stub YouTube ingest complete.");
+
+  console.log(`YouTube ingestion complete: ${videos.length} videos upserted`);
 }
 
 main()
-  .then(async () => prisma.$disconnect())
-  .catch(async (error) => {
+  .catch((error) => {
+    console.error("YouTube ingestion failed");
     console.error(error);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
