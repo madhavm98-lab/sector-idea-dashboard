@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SourceContent {
+  id           String   @id @default(cuid())
+  externalId   String   @unique
+  sourceType   String
+  sourceName   String
+  title        String
+  body         String
+  url          String
+  publishedAt  DateTime
+  sectorHint   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ideas        ProcessedIdea[]
+
+  @@index([sourceType, publishedAt])
+}
+
+model ProcessedIdea {
+  id            String   @id @default(cuid())
+  sourceContentId String
+  title         String
+  summary       String
+  thesis        String
+  sector        String
+  sentiment     String
+  confidence    Float
+  tickers       String[]
+  createdAt     DateTime @default(now())
+
+  sourceContent SourceContent @relation(fields: [sourceContentId], references: [id], onDelete: Cascade)
+
+  @@index([sector, createdAt])
+}

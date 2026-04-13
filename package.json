@@ -1,0 +1,35 @@
+{
+  "name": "sector-idea-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "seed": "tsx scripts/seed.ts",
+    "ingest:reddit": "tsx workers/ingest-reddit.ts",
+    "ingest:youtube": "tsx workers/ingest-youtube.ts",
+    "process:ideas": "tsx workers/process-content.ts",
+    "refresh": "npm run ingest:reddit && npm run ingest:youtube && npm run process:ideas"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.6.0",
+    "date-fns": "^4.1.0",
+    "next": "15.2.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "prisma": "^6.6.0",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
