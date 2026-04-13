@@ -1,11 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: dark;
+  --bg-base: #030810;
+  --bg-surface: #080f1f;
+  --bg-elevated: #0d1628;
+  --border: #1a2742;
+  --border-subtle: #111d35;
+  --text-primary: #e2eaf8;
+  --text-secondary: #7a90b8;
+  --text-muted: #3d5278;
+  --accent: #00c8ff;
+  --accent-dim: rgba(0, 200, 255, 0.12);
+  --bull: #00e676;
+  --bull-dim: rgba(0, 230, 118, 0.1);
+  --bear: #ff4560;
+  --bear-dim: rgba(255, 69, 96, 0.1);
+  --neutral: #ffb300;
+  --neutral-dim: rgba(255, 179, 0, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-base);
 }
 
 body {
-  @apply bg-slate-950 text-slate-100;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.grid-bg {
+  background-image: radial-gradient(rgba(0, 200, 255, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.font-display { font-family: 'Syne', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.animate-fade-in { animation: fadeInUp 0.35s ease both; }
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .mobile-sidebar-toggle {
+    display: flex !important;
+  }
 }
