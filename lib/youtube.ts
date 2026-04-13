@@ -126,13 +126,22 @@ export async function fetchRecentVideosForChannel(
 export async function fetchRecentVideosAllChannels(
   lookbackDays = 7,
 ): Promise<NormalizedYouTubeVideo[]> {
-  const allResults = await Promise.all(
+  const settled = await Promise.allSettled(
     YOUTUBE_CHANNELS.map((channel) =>
       fetchRecentVideosForChannel(channel, lookbackDays),
     ),
   );
 
-  return allResults
-    .flat()
-    .sort((a, b) => b.publishedAt.getTime() - a.publishedAt.getTime());
+  const successes = settled
+    .filter(
+      (result): result is PromiseFulfilledResult<NormalizedYouTubeVideo[]> =>
+        result.status === "fulfilled",
+    )
+    .flatMap((result) => result.value);
+
+  return successes.sort(
+    (a, b) => b.publishedAt.getTime() - a.publishedAt.getTime(),
+  );
 }
+
+
