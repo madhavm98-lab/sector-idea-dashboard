@@ -1,39 +1,59 @@
-import { prisma } from "@/lib/prisma";
-import { subHours } from "date-fns";
-import { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import { fetchRecentVideosAllChannels } from "@/lib/youtube";
 
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const hours = Math.min(parseInt(searchParams.get("hours") ?? "48"), 168);
-  const sector = searchParams.get("sector");
-  const sentiment = searchParams.get("sentiment");
-  const sourceType = searchParams.get("sourceType");
-  const q = searchParams.get("q")?.toLowerCase();
+const prisma = new PrismaClient();
 
-  const cutoff = subHours(new Date(), hours);
+export async function GET() {
+  try {
+    const videos = await fetchRecentVideosAllChannels(7);
 
-  const ideas = await prisma.processedIdea.findMany({
-    where: {
-      ...(sector ? { sector } : {}),
-      ...(sentiment ? { sentiment } : {}),
-      sourceContent: {
-        publishedAt: { gte: cutoff },
-        ...(sourceType ? { sourceType } : {}),
+    for (const video of videos) {
+      await prisma.sourceContent.upsert({
+        where: { url: video.url },
+        update: {
+          sourceType: video.sourceType,
+          sourceName: video.sourceName,
+          author: video.author,
+          title: video.title,
+          body: video.body,
+          publishedAt: video.publishedAt,
+          metadata: video.metadata,
+        },
+        create: {
+          sourceType: video.sourceType,
+          sourceName: video.sourceName,
+          author: video.author,
+          title: video.title,
+          body: video.body,
+          url: video.url,
+          publishedAt: video.publishedAt,
+          metadata: video.metadata,
+        },
+      });
+    }
+
+    return NextResponse.json({
+      ok: true,
+      count: videos.length,
+      videos: videos.slice(0, 5).map((video) => ({
+        title: video.title,
+        url: video.url,
+        publishedAt: video.publishedAt,
+        sourceName: video.sourceName,
+        windowTags: video.metadata.windowTags,
+      })),
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : "Unknown error",
       },
-    },
-    include: { sourceContent: true },
-    orderBy: { sourceContent: { publishedAt: "desc" } },
-    take: 200,
-  });
-
-  const filtered = q
-    ? ideas.filter(
-        (i) =>
-          i.title.toLowerCase().includes(q) ||
-          i.summary.toLowerCase().includes(q) ||
-          i.tickers.some((t) => t.toLowerCase().includes(q))
-      )
-    : ideas;
-
-  return Response.json({ ideas: filtered, total: filtered.length });
+      { status: 500 },
+    );
+  } finally {
+    await prisma.$disconnect();
+  }
 }
